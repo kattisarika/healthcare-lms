@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -18,10 +19,14 @@ mongoose.set('toJSON', {
   },
 });
 
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({ origin: process.env.FRONTEND_URL || true }));
 app.use(express.json());
 
-// Files are served from Cloudflare R2 — no local static serving needed
+// Serve built React frontend in production
+const DIST_PATH = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(DIST_PATH)) {
+  app.use(express.static(DIST_PATH));
+}
 
 // Routes
 app.use('/auth', require('./routes/auth'));
@@ -33,6 +38,13 @@ app.use('/api/quizzes', require('./routes/quizzes'));
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Catch-all: serve React app for any non-API route
+if (fs.existsSync(DIST_PATH)) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(DIST_PATH, 'index.html'));
+  });
+}
 
 // Seed default admin if no users exist
 async function seedAdmin() {
