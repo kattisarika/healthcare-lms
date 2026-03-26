@@ -18,6 +18,9 @@ backend/uploads/
 # SQLite database (legacy)
 *.db
 
+# Vite cache
+frontend/.vite/
+
 # Nested git clones
 healthcare-lms/
 
