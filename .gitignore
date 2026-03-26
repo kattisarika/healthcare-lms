@@ -15,6 +15,12 @@ frontend/build/
 # Temp uploads
 backend/uploads/
 
+# SQLite database (legacy)
+*.db
+
+# Nested git clones
+healthcare-lms/
+
 # Logs
 *.log
 npm-debug.log*
